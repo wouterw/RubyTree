@@ -36,8 +36,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-require 'structured_warnings'
-
 module Tree::Utils
   # Provides utility functions to measure various tree metrics.
   module TreeMetricsHandler
@@ -107,32 +105,6 @@ module Tree::Utils
       # @see #node_depth
       def level
         node_depth
-      end
-
-      # @!attribute [r] depth
-      # Depth of the tree from this node. A single leaf node has a depth of 1.
-      #
-      # This method is *DEPRECATED* and may be removed in the subsequent
-      # releases. Note that the value returned by this method is actually the:
-      #
-      # _height_ + 1 of the node, *NOT* the _depth_.
-      #
-      # For correct and conventional behavior, please use {#node_depth} and
-      # {#node_height} methods instead.
-      #
-      # @return [Integer] depth of the node.
-      #
-      # @deprecated This method returns an incorrect value. Use the
-      # {#node_depth} method instead.
-      #
-      # @see #node_depth
-      def depth
-        warn DeprecatedMethodWarning,
-             "This method is deprecated.  "\
-             "Please use node_depth() or node_height() instead (bug # 22535)"
-
-        return 1 if is_leaf?
-        1 + @children.collect { |child| child.depth }.max
       end
 
       # @!attribute [r] breadth

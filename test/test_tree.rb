@@ -310,9 +310,6 @@ module TestTree
 
     # Test the <=> operator.
     def test_spaceship
-      require 'structured_warnings'
-      StandardWarning.disable   # Disable the warnings for using integers as node names
-
       first_node  = Tree::TreeNode.new(1)
       second_node = Tree::TreeNode.new(2)
 
@@ -330,8 +327,6 @@ module TestTree
 
       second_node = Tree::TreeNode.new("ABC")
       assert_equal(0, first_node <=> second_node)
-
-      StandardWarning.enable
     end
 
     # Test the inclusion of Comparable
@@ -952,36 +947,6 @@ module TestTree
       assert_same(pers, @root.content, "Content should be the same")
     end
 
-    # Test the depth computation algorithm.  Note that this is an incorrect computation and actually returns height+1
-    # instead of depth.  This method has been deprecated in this release and may be removed in the future.
-    def test_depth
-      begin
-        require 'structured_warnings'
-        assert_warn(DeprecatedMethodWarning) { do_deprecated_depth }
-      rescue LoadError
-        # Since the structued_warnings package is not present, we revert to good old Kernel#warn behavior.
-        do_deprecated_depth
-      end
-    end
-
-    # Run the assertions for the deprecated depth method.
-    def do_deprecated_depth
-      assert_equal(1, @root.depth, "A single node's depth is 1")
-
-      @root << @child1
-      assert_equal(2, @root.depth, "This should be of depth 2")
-
-      @root << @child2
-      assert_equal(2, @root.depth, "This should be of depth 2")
-
-      @child2 << @child3
-      assert_equal(3, @root.depth, "This should be of depth 3")
-      assert_equal(2, @child2.depth, "This should be of depth 2")
-
-      @child3 << @child4
-      assert_equal(4, @root.depth, "This should be of depth 4")
-    end
-
     # Test the height computation algorithm
     def test_node_height
       assert_equal(0, @root.node_height, "A single node's height is 0")
@@ -1403,47 +1368,12 @@ module TestTree
       assert_equal(k[1].name, root_node[1].name, "Child 2 should be returned")
     end
 
-    # Test the old CamelCase method names
-    def test_old_camelCase_method_names
-      setup_test_tree
-
-      meth_names_to_test = %w{isRoot? isLeaf? hasContent?
-                              hasChildren? firstChild lastChild
-                              firstSibling isFirstSibling? lastSibling isLastSibling?
-                              isOnlyChild? nextSibling previousSibling nodeHeight nodeDepth
-                              removeFromParent! removeAll! freezeTree! }
-
-      require 'structured_warnings'
-
-      DeprecatedMethodWarning.disable do
-        assert(@root.isRoot?)   # Test if the original method is really called
-      end
-
-      meth_names_to_test.each do |meth_name|
-        assert_warn(DeprecatedMethodWarning) {@root.send(meth_name)}
-      end
-
-      # Special Case for printTree to avoid putting stuff on the STDOUT during the unit test.
-      begin
-        require 'stringio'
-        $stdout = StringIO.new
-        assert_warn(DeprecatedMethodWarning) { @root.send('printTree') }
-      ensure
-        $stdout = STDOUT
-      end
-
-    end
-
     # Test usage of integers as node names
     def test_integer_node_names
-
-      require 'structured_warnings'
-      assert_warn(StandardWarning) do
-        @n_root = Tree::TreeNode.new(0, "Root Node")
-        @n_child1 = Tree::TreeNode.new(1, "Child Node 1")
-        @n_child2 = Tree::TreeNode.new(2, "Child Node 2")
-        @n_child3 = Tree::TreeNode.new("three", "Child Node 3")
-      end
+      @n_root = Tree::TreeNode.new(0, "Root Node")
+      @n_child1 = Tree::TreeNode.new(1, "Child Node 1")
+      @n_child2 = Tree::TreeNode.new(2, "Child Node 2")
+      @n_child3 = Tree::TreeNode.new("three", "Child Node 3")
 
       @n_root << @n_child1
       @n_root << @n_child2
@@ -1457,12 +1387,7 @@ module TestTree
       # Sanity check for the "normal" string name cases. Both cases should work.
       assert_equal(@n_root["three", false].name, "three")
 
-      StandardWarning.disable
       assert_equal(@n_root["three", true].name, "three")
-
-      # Also ensure that the warning is actually being thrown
-      StandardWarning.enable
-      assert_warn(StandardWarning) {assert_equal(@n_root["three", true].name, "three") }
     end
 
     # Test the addition of a node to itself as a child
